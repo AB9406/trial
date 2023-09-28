@@ -1,0 +1,100 @@
+#number of cliques of order four in G(p^r)
+from sympy.ntheory.factor_ import totient
+from math import gcd
+
+def cong(a,n):
+  return (a%n)
+
+def peisert_like (p,r):         #calculates the number of cliques of order four
+
+  n=int(pow(p,r))
+  zn=list()
+  div=list()
+  phi_n=totient(n)
+  g = 0
+
+  for i in range(1,n):
+    if gcd(i,n)==1:
+      zn.append(i)              #zn contains the elements of Z_n^*
+  print ("Z_n^* is ",zn)
+
+  for i in range(1, int(phi_n/2)+1):
+    if phi_n%i==0:
+      div.append(i)             # div contains all the positive divisors of phi(n), except phi(n)
+  ldiv=len(div)
+  for i in range(phi_n):        # this loop finds g, a generator of Z_n^*. Each element 'a' in Z_n^* is considered, and if a^dd=1 in Z_n^* for some 'dd' in 'div', then 'a' is discarded
+    var=0
+    a=zn[i]
+    for d in range (ldiv):
+      dd=div[d]
+      if (pow(a,dd)%n)==1:
+        var=1
+        break
+    if var==0:
+      g=a
+      break
+  print("generator of Z_n^*, g, is ",g)
+  g1=g*g*g*g%n
+
+  H=list()                    # H is the connection set of the graph G(p^r)
+  for i in range(1, int(phi_n/4)+1):
+    temp=1
+    for j in range(1, i+1):
+      temp=temp*g1
+    H.append(temp%n)    #  powers of g^4, that is, elements of <g^4>, are appended to H
+  for i in range(int(phi_n/4)):
+    H.append((H[i]*g)%n)  # elements of g<g^4> are appended to H
+  print("The connection set H is ",H)
+
+  b1=(int)(phi_n/2)
+  number=0
+  flag1, flag2, flag3, flag4, flag5, flag6=0,0,0,0,0,0
+  temp1, temp2, temp3, temp4, temp5, temp6=0,0,0,0,0,0
+
+#checking whether each tuple (i,j,k,l) forms a clique or not
+  for i in range (n):
+    for j in range(i+1,n): #checking if ij is an edge
+      temp1, flag1=(i-j)%n,0
+      for m in range (b1):
+        if temp1==H[m]:
+          flag1=1
+          break
+      if flag1==0:
+        continue
+      for k in range(j+1,n): #checking if ik and jk are edges
+        temp2, temp3, flag2, flag3=(i-k)%n, (j-k)%n, 0, 0
+        for m in range (b1):
+          if temp2==H[m]:
+            flag2=1
+            break
+        for m in range (b1):
+          if temp3==H[m]:
+            flag3=1
+            break
+        if flag2==0 or flag3==0:
+          continue
+        for l in range(k+1,n):  #checking if il,jl,kl are edges
+          temp4, temp5, temp6, flag4, flag5, flag6=(i-l)%n, (j-l)%n, (k-l)%n, 0, 0, 0
+          for m in range (b1):
+            if temp4==H[m]:
+              flag4=1
+              break
+          for m in range (b1):
+            if temp5==H[m]:
+              flag5=1
+              break
+          for m in range (b1):
+            if temp6==H[m]:
+              flag6=1
+              break
+          if flag4==0 or flag5==0 or flag6==0:
+            continue
+          number=number+1     #counts the number of tuples (i,j,k,l) forming a clique
+          print("the tuple (",i,",",j,",",k,",",l,") forms a clique" )
+  print("The number of cliques of order four in the Peisert-like graph G(p^r) is ",number)
+print("enter a prime p congruent to 1 modulo 8")
+p = int(input())
+print("enter a positive integer r")
+r = int(input())
+
+peisert_like (p,r)
